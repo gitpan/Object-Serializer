@@ -1,0 +1,99 @@
+NAME
+    Object::Serializer - General Purpose Object Serializer
+
+VERSION
+    version 0.000001
+
+SYNOPSIS
+        package Point;
+
+        use Moo;
+        use parent 'Object::Serializer';
+
+        has 'x' => (is => 'rw');
+        has 'y' => (is => 'rw');
+
+        package main;
+
+        my $p = Point->new(x => 10, y => 10);
+
+        # serialize the class into a hash
+        my $p1 = $p->serialize; # returns { __CLASS__ => 'Point', x => 10, y => 10 }
+
+        # deserialize the hash into a class
+        my $p2 = $p->deserialize($p1);
+
+DESCRIPTION
+    Formatting data structures into an ideal format for passing
+    representations in and out of applications can be a real pain.
+    Object::Serializer is a fast and simple pure-perl framework-agnostic
+    type-less none-opinionated light-weight primative general purpose object
+    serializer. While module should be considered experimental, I don't
+    anticipate the interface changing, much.
+
+METHODS
+  serialize
+    The serialize method expects an object and returns a serialized
+    (hashified) version of that object.
+
+        my $hash = $self->serialize($object);
+
+  deserialize
+    The deserialize method expects an object, preferrably a pre-serialized
+    one, and returns a deserialized version of that object.
+
+        my $object = $self->deserialize($object);
+
+  serialize::object
+    The serialize::object method expects a reftype and a list of key/value
+    pairs having the keys expand and/or collapse. This method registers a
+    custom serializer to be used during the expansion and/or collapsing
+    occurrences.
+
+        CLASS->serialize::object(
+            TYPE => (
+                expand   => sub { ... },
+                collapse => sub { ... }
+            )
+        );
+
+EXTENSION
+    Object::Serializer can be used as a serializer independently, however,
+    it is primarily designed to be used as a base class for your own classes
+    or roles. By default, Object::Serializer doesn't do anything special for
+    you in the way of serialization, however, you can easily hook into the
+    serialization process by defining your own custom serialization
+    routines. The following sytax is what you might use to register your own
+    custom serializers:
+
+        Object::Serializer->serialize::object(
+            DateTime => ( collapse => sub { pop->iso8601 } )
+        );
+
+    This method call registers a custom serializer that is executed globally
+    whenever a DateTime object if found. The expand and collapse coderefs
+    suggest what will happen on deserialization and serialization
+    respectively, additionally, you can register custom serializers to only
+    be used when invoked by a specific class. The following sytax is what
+    you might use to register a custom serializer with a specific class:
+
+        Point->serialize::object(
+            DateTime => ( collapse => sub { pop->iso8601 } )
+        );
+
+CAVEATS
+    Circular references are specifically disallowed, however if you can
+    break the cycles yourself then re-assemble them later you can get around
+    this. Custom serializers must match the object's reftype exactly to be
+    enacted. Extending the serialization process with custom serializers
+    usually means losing the ability to recreate the serialized objects.
+
+AUTHOR
+    Al Newkirk <anewkirk@ana.io>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2013 by Al Newkirk.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
