@@ -2,7 +2,7 @@ NAME
     Object::Serializer - General Purpose Object Serializer
 
 VERSION
-    version 0.000003
+    version 0.000004
 
 SYNOPSIS
         package Point;
@@ -27,10 +27,10 @@ DESCRIPTION
     Getting objects into an ideal format for passing representations in and
     out of applications can be a real pain. Object::Serializer is a fast and
     simple pure-perl framework-agnostic type-less none-opinionated
-    light-weight primitive general purpose object serializer which try to
-    help make object serialization better. Note, this module should be
-    considered experimental, I don't anticipate the interface to change,
-    much, although I'm sure it will.
+    light-weight primitive general purpose object serializer which tries to
+    help make object serialization easier. Note, this module should be
+    considered experimental though I don't anticipate the interface changing
+    much.
 
 METHODS
   serialize
@@ -45,14 +45,14 @@ METHODS
 
         my $object = $self->deserialize($object);
 
-  serialize::object
-    The serialize::object method expects a reftype and a list of key/value
-    pairs having the keys expand and/or collapse. This method registers a
-    custom serializer to be used during the expansion and/or collapsing
-    occurrences.
+  serialization_strategy_for
+    The serialization_strategy_for method expects a reftype and a list of
+    key/value pairs having the keys expand and/or collapse. This method
+    registers a custom serialization strategy to be used during the
+    expansion and/or collapsing of specific reference types.
 
-        CLASS->serialize::object(
-            TYPE => (
+        CLASS->serialization_strategy_for(
+            REFTYPE => (
                 expand   => sub { ... },
                 collapse => sub { ... }
             )
@@ -60,25 +60,27 @@ METHODS
 
 EXTENSION
     Object::Serializer can be used as a serializer independently, however,
-    it is primarily designed to be used as a base class for your own classes
-    or roles. By default, Object::Serializer doesn't do anything special for
+    it is primarily designed to be used as a base class for your classes or
+    roles. By default, Object::Serializer doesn't do anything special for
     you in the way of serialization, however, you can easily hook into the
-    serialization process by defining your own custom serialization
-    routines. The following syntax is what you might use to register your
-    own custom serializers:
+    serialization process by defining your serialization strategy using your
+    own custom serialization routines which will be executed whenever a
+    specific reference type is encountered. The following syntax is what you
+    might use to register your own custom serialization strategy:
 
-        Object::Serializer->serialize::object(
+        Object::Serializer->serialization_strategy_for(
             DateTime => ( collapse => sub { pop->iso8601 } )
         );
 
-    This method call registers a custom serializer that is executed globally
-    whenever a DateTime object if found. The expand and collapse coderefs
-    suggest what will happen on deserialization and serialization
-    respectively, additionally, you can register custom serializers to only
-    be used when invoked by a specific class. The following syntax is what
-    you might use to register a custom serializer with a specific class:
+    This aforementioned example registers a custom serializer that is
+    executed globally whenever a DateTime object is found. The expand and
+    collapse coderefs suggest what will happen on deserialization and
+    serialization respectively, additionally, you can register a
+    serialization strategy to be used only when invoked by a specific class.
+    The following syntax is what you might use to register a serialization
+    strategy for a specific class:
 
-        Point->serialize::object(
+        Point->serialization_strategy_for(
             DateTime => ( collapse => sub { pop->iso8601 } )
         );
 
@@ -87,9 +89,10 @@ CAVEATS
     weaken or otherwise handle them yourself then re-assemble them later as
     a means toward getting around this. Custom serializers must match the
     object's reftype exactly to be enacted. Extending the serialization
-    process with custom serializers usually means losing the ability to
-    recreate the serialized objects, i.e. custom serializers will usually be
-    designed to either expand or collapse but probably not both.
+    process with a custom serialization strategy usually means losing the
+    ability to recreate (deserialize) the serialized objects, i.e. custom
+    serializers will usually be designed to either expand or collapse but
+    probably not both.
 
 AUTHOR
     Al Newkirk <anewkirk@ana.io>

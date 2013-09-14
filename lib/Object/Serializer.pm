@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000003'; # VERSION
+our $VERSION = '0.000004'; # VERSION
 
 
 sub new {
@@ -28,41 +28,21 @@ sub _hashify {
     local $Data::Dumper::Deepcopy   = 1;
     local $Data::Dumper::Purity     = 0;
 
-    my $subject = Data::Dumper::Dumper($object);
+    my $id = join '::', __PACKAGE__, '_identify';
+    (my $subject = Data::Dumper::Dumper($object)) =~
+        s/bless(?=(?:(?:(?:[^"\\]++|\\.)*+"){2})*+(?:[^"\\]++|\\.)*+$)/$id/g;
 
-    my $grammar = do {
-        use Regexp::Grammars;
-        qr{
-            bless <.left_paren>
-                (?: <.escape> | <.paren_pair> | <.brace_pair> |  <.non_paren> )*
-            <.right_paren>
-                (?=(?:(?:(?:[^"\\]++|\\.)*+"){2})*+(?:[^"\\]++|\\.)*+$)
+    return do { no strict; eval "my \$VAR1 = $subject\n" } or die $@;
+}
 
-            <rule: paren_pair>
-                \(  (?: <escape> | <paren_pair> | <brace_pair> | [^()] )*  \)
+sub _identify {
+    my ($reference, $class) = @_;
 
-            <rule: brace_pair>
-                \{  (?: <escape> | <paren_pair> | <brace_pair> | [^{}] )*  \}
-
-            <token: escape>       \\ .
-            <token: left_paren>   \(
-            <token: right_paren>  \)
-            <token: non_paren>    [^()]
-        }xms;
-    };
-
-    while ($subject =~ /$grammar/) {
-        my $after = my $before = (values(%/))[0];
-        my $class = $1 if $after =~ s/,\s?'([\w:]+)'\s?\)$//;
-        my $head  = "'$MARKER' => '$class',";
-
-        $after   =~ s/^bless\(\s?{/{$head/;
-        $after   = $after;
-        $before  = quotemeta $before;
-        $subject =~ s/$before/$after/g;
+    if ('HASH' eq ref $reference) {
+        $reference->{$MARKER} = $class;
     }
 
-    return eval qq{ my \$VAR1 = $subject; };
+    return $reference;
 }
 
 sub _typify {
@@ -189,10 +169,11 @@ sub deserialize {
 }
 
 
-sub serialize::object {
+sub serialization_strategy_for {
     my ($namespace, $reftype, %attributes) = @_;
 
-    die "Couldn't register type serializer due to invalid arguments" unless
+    die "Couldn't register reftype serialization strategy ".
+        "due to invalid arguments" unless
         $namespace && $reftype && (
             'CODE' eq ref $attributes{collapse} ||
             'CODE' eq ref $attributes{expand}
@@ -214,7 +195,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000003
+version 0.000004
 
 =head1 SYNOPSIS
 
@@ -241,9 +222,9 @@ version 0.000003
 Getting objects into an ideal format for passing representations in and out of
 applications can be a real pain. Object::Serializer is a fast and simple
 pure-perl framework-agnostic type-less none-opinionated light-weight primitive
-general purpose object serializer which try to help make object serialization
-better. Note, this module should be considered experimental, I don't anticipate
-the interface to change, much, although I'm sure it will.
+general purpose object serializer which tries to help make object serialization
+easier. Note, this module should be considered experimental though I don't
+anticipate the interface changing much.
 
 =head1 METHODS
 
@@ -261,14 +242,15 @@ returns a serialized version of that object.
 
     my $object = $self->deserialize($object);
 
-=head2 serialize::object
+=head2 serialization_strategy_for
 
-The serialize::object method expects a reftype and a list of key/value pairs
-having the keys expand and/or collapse. This method registers a custom
-serializer to be used during the expansion and/or collapsing occurrences.
+The serialization_strategy_for method expects a reftype and a list of key/value
+pairs having the keys expand and/or collapse. This method registers a custom
+serialization strategy to be used during the expansion and/or collapsing of
+specific reference types.
 
-    CLASS->serialize::object(
-        TYPE => (
+    CLASS->serialization_strategy_for(
+        REFTYPE => (
             expand   => sub { ... },
             collapse => sub { ... }
         )
@@ -277,24 +259,26 @@ serializer to be used during the expansion and/or collapsing occurrences.
 =head1 EXTENSION
 
 Object::Serializer can be used as a serializer independently, however, it is
-primarily designed to be used as a base class for your own classes or roles. By
+primarily designed to be used as a base class for your classes or roles. By
 default, Object::Serializer doesn't do anything special for you in the way of
 serialization, however, you can easily hook into the serialization process by
-defining your own custom serialization routines. The following syntax is what
-you might use to register your own custom serializers:
+defining your serialization strategy using your own custom serialization
+routines which will be executed whenever a specific reference type is
+encountered. The following syntax is what you might use to register your
+own custom serialization strategy:
 
-    Object::Serializer->serialize::object(
+    Object::Serializer->serialization_strategy_for(
         DateTime => ( collapse => sub { pop->iso8601 } )
     );
 
-This method call registers a custom serializer that is executed globally
-whenever a DateTime object if found. The expand and collapse coderefs suggest
-what will happen on deserialization and serialization respectively,
-additionally, you can register custom serializers to only be used when invoked
-by a specific class. The following syntax is what you might use to register a
-custom serializer with a specific class:
+This aforementioned example registers a custom serializer that is executed
+globally whenever a DateTime object is found. The expand and collapse coderefs
+suggest what will happen on deserialization and serialization respectively,
+additionally, you can register a serialization strategy to be used only when
+invoked by a specific class. The following syntax is what you might use to
+register a serialization strategy for a specific class:
 
-    Point->serialize::object(
+    Point->serialization_strategy_for(
         DateTime => ( collapse => sub { pop->iso8601 } )
     );
 
@@ -303,10 +287,10 @@ custom serializer with a specific class:
 Circular references are problematic and should be avoided, you can weaken or
 otherwise handle them yourself then re-assemble them later as a means toward
 getting around this. Custom serializers must match the object's reftype exactly
-to be enacted. Extending the serialization process with custom serializers
-usually means losing the ability to recreate the serialized objects, i.e.
-custom serializers will usually be designed to either expand or collapse
-but probably not both.
+to be enacted. Extending the serialization process with a custom serialization
+strategy usually means losing the ability to recreate (deserialize) the
+serialized objects, i.e. custom serializers will usually be designed to either
+expand or collapse but probably not both.
 
 =head1 AUTHOR
 

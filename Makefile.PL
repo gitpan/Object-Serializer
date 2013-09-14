@@ -20,13 +20,12 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "Object::Serializer",
   "PREREQ_PM" => {
-    "Data::Dumper" => 0,
-    "Regexp::Grammars" => 0
+    "Data::Dumper" => 0
   },
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.000003",
+  "VERSION" => "0.000004",
   "test" => {
     "TESTS" => "t/*.t"
   }
