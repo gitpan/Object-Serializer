@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000002'; # VERSION
+our $VERSION = '0.000003'; # VERSION
 
 
 sub new {
@@ -214,7 +214,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000002
+version 0.000003
 
 =head1 SYNOPSIS
 
@@ -238,11 +238,12 @@ version 0.000002
 
 =head1 DESCRIPTION
 
-Formatting data structures into an ideal format for passing representations in
-and out of applications can be a real pain. Object::Serializer is a fast and
-simple pure-perl framework-agnostic type-less none-opinionated light-weight
-primitive general purpose object serializer. While module should be considered
-experimental, I don't anticipate the interface changing, much.
+Getting objects into an ideal format for passing representations in and out of
+applications can be a real pain. Object::Serializer is a fast and simple
+pure-perl framework-agnostic type-less none-opinionated light-weight primitive
+general purpose object serializer which try to help make object serialization
+better. Note, this module should be considered experimental, I don't anticipate
+the interface to change, much, although I'm sure it will.
 
 =head1 METHODS
 
@@ -299,11 +300,13 @@ custom serializer with a specific class:
 
 =head1 CAVEATS
 
-Circular references are specifically disallowed, however if you can break the
-cycles yourself then re-assemble them later you can get around this. Custom
-serializers must match the object's reftype exactly to be enacted. Extending the
-serialization process with custom serializers usually means losing the ability
-to recreate the serialized objects.
+Circular references are problematic and should be avoided, you can weaken or
+otherwise handle them yourself then re-assemble them later as a means toward
+getting around this. Custom serializers must match the object's reftype exactly
+to be enacted. Extending the serialization process with custom serializers
+usually means losing the ability to recreate the serialized objects, i.e.
+custom serializers will usually be designed to either expand or collapse
+but probably not both.
 
 =head1 AUTHOR
 
