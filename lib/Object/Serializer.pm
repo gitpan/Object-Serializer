@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000004'; # VERSION
+our $VERSION = '0.000005'; # VERSION
 
 
 sub new {
@@ -195,7 +195,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000004
+version 0.000005
 
 =head1 SYNOPSIS
 
@@ -224,7 +224,7 @@ applications can be a real pain. Object::Serializer is a fast and simple
 pure-perl framework-agnostic type-less none-opinionated light-weight primitive
 general purpose object serializer which tries to help make object serialization
 easier. Note, this module should be considered experimental though I don't
-anticipate the interface changing much.
+anticipate the interface will change much.
 
 =head1 METHODS
 
@@ -237,8 +237,8 @@ version of that object.
 
 =head2 deserialize
 
-The deserialize method expects an object, preferably a pre-serialized one, and
-returns a serialized version of that object.
+The deserialize method expects an object and returns a deserialized
+(objectified) version of that object.
 
     my $object = $self->deserialize($object);
 
@@ -246,7 +246,7 @@ returns a serialized version of that object.
 
 The serialization_strategy_for method expects a reftype and a list of key/value
 pairs having the keys expand and/or collapse. This method registers a custom
-serialization strategy to be used during the expansion and/or collapsing of
+serialization strategy to be used during the expanding and/or collapsing of
 specific reference types.
 
     CLASS->serialization_strategy_for(
@@ -265,18 +265,18 @@ serialization, however, you can easily hook into the serialization process by
 defining your serialization strategy using your own custom serialization
 routines which will be executed whenever a specific reference type is
 encountered. The following syntax is what you might use to register your
-own custom serialization strategy:
+own custom serialization strategy. This example registers a custom serializer
+that is executed globally whenever a DateTime object is found. The expand and
+collapse coderefs suggest what will happen on deserialization and serialization
+respectively.
 
     Object::Serializer->serialization_strategy_for(
         DateTime => ( collapse => sub { pop->iso8601 } )
     );
 
-This aforementioned example registers a custom serializer that is executed
-globally whenever a DateTime object is found. The expand and collapse coderefs
-suggest what will happen on deserialization and serialization respectively,
-additionally, you can register a serialization strategy to be used only when
+Additionally, you can register a serialization strategy to be used only when
 invoked by a specific class. The following syntax is what you might use to
-register a serialization strategy for a specific class:
+register a serialization strategy to be executed only for a specific class:
 
     Point->serialization_strategy_for(
         DateTime => ( collapse => sub { pop->iso8601 } )
