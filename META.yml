@@ -15,9 +15,9 @@ meta-spec:
 name: Object-Serializer
 requires:
   Data::Dumper: 0
-  Regexp::Grammers: 0
+  Regexp::Grammars: 0
 resources:
   bugtracker: https://github.com/alnewkirk/Object-Serializer/issues
-  homepage: https://github.com/alnewkirk/Object-Serializer
+  homepage: http://search.cpan.org/dist/Object-Serializer/
   repository: git://github.com/alnewkirk/Object-Serializer.git
-version: 0.000001
+version: 0.000002

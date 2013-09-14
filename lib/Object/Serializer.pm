@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000001'; # VERSION
+our $VERSION = '0.000002'; # VERSION
 
 
 sub new {
@@ -214,7 +214,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000001
+version 0.000002
 
 =head1 SYNOPSIS
 
@@ -241,7 +241,7 @@ version 0.000001
 Formatting data structures into an ideal format for passing representations in
 and out of applications can be a real pain. Object::Serializer is a fast and
 simple pure-perl framework-agnostic type-less none-opinionated light-weight
-primative general purpose object serializer. While module should be considered
+primitive general purpose object serializer. While module should be considered
 experimental, I don't anticipate the interface changing, much.
 
 =head1 METHODS
@@ -255,8 +255,8 @@ version of that object.
 
 =head2 deserialize
 
-The deserialize method expects an object, preferrably a pre-serialized one, and
-returns a deserialized version of that object.
+The deserialize method expects an object, preferably a pre-serialized one, and
+returns a serialized version of that object.
 
     my $object = $self->deserialize($object);
 
@@ -279,8 +279,8 @@ Object::Serializer can be used as a serializer independently, however, it is
 primarily designed to be used as a base class for your own classes or roles. By
 default, Object::Serializer doesn't do anything special for you in the way of
 serialization, however, you can easily hook into the serialization process by
-defining your own custom serialization routines. The following sytax is what you
-might use to register your own custom serializers:
+defining your own custom serialization routines. The following syntax is what
+you might use to register your own custom serializers:
 
     Object::Serializer->serialize::object(
         DateTime => ( collapse => sub { pop->iso8601 } )
@@ -290,7 +290,7 @@ This method call registers a custom serializer that is executed globally
 whenever a DateTime object if found. The expand and collapse coderefs suggest
 what will happen on deserialization and serialization respectively,
 additionally, you can register custom serializers to only be used when invoked
-by a specific class. The following sytax is what you might use to register a
+by a specific class. The following syntax is what you might use to register a
 custom serializer with a specific class:
 
     Point->serialize::object(

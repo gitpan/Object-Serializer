@@ -21,12 +21,12 @@ my %WriteMakefileArgs = (
   "NAME" => "Object::Serializer",
   "PREREQ_PM" => {
     "Data::Dumper" => 0,
-    "Regexp::Grammers" => 0
+    "Regexp::Grammars" => 0
   },
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.000001",
+  "VERSION" => "0.000002",
   "test" => {
     "TESTS" => "t/*.t"
   }
