@@ -1,10 +1,32 @@
 ==================================================
-Changes from 2012-09-14 00:00:00 +0000 to present.
+Changes from 2012-09-15 00:00:00 +0000 to present.
 ==================================================
 
 ---------------------------------------------
-version 0.000005 at 2013-09-14 22:08:37 +0000
+version 0.000006 at 2013-09-15 20:17:17 +0000
 ---------------------------------------------
+
+  Change: ca1857466994c59880164a694245fbc1f0647bd6
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 16:17:07 +0000
+
+    added the ability to serialize without tagging 
+
+  Change: 4dbac6b3c1f6219070fb8afc2e696eb91fe490a6
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 05:04:15 +0000
+
+    miscellaneous changes (not worth mentioning) 
+
+---------------------------------------------
+version 0.000005 at 2013-09-14 22:08:40 +0000
+---------------------------------------------
+
+  Change: 4989d761d07070f5fd85054bf6a0a49c6f708c1f
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-14 18:08:40 +0000
+
+    v0.000005 
 
   Change: 892e35f6db91236b253a803606c5574e8b4d6c9b
   Author: Al Newkirk <anewkirk@ana.io>

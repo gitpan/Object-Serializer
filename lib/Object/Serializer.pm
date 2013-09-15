@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000005'; # VERSION
+our $VERSION = '0.000006'; # VERSION
 
 
 sub new {
@@ -39,7 +39,7 @@ sub _identify {
     my ($reference, $class) = @_;
 
     if ('HASH' eq ref $reference) {
-        $reference->{$MARKER} = $class;
+        $reference->{$MARKER} = $class if defined $MARKER;
     }
 
     return $reference;
@@ -89,7 +89,7 @@ sub _typify {
 }
 
 sub _perform_serialization {
-    my ($self, $object) = @_;
+    my ($self, $object, %options) = @_;
     return unless $object;
 
     my $data;
@@ -97,14 +97,14 @@ sub _perform_serialization {
     if ('ARRAY' eq ref $object) {
         $data = [];
         for my $val (@{$object}) {
-            push @{$data} => $self->_perform_serialization($val);
+            push @{$data} => $self->_perform_serialization($val, %options);
         }
     }
     elsif ('HASH' eq ref $object) {
         $data = {};
         while (my($key, $val) = each(%{$object})) {
             if ('HASH' eq ref $val) {
-                $data->{$key} = $self->_perform_serialization($val);
+                $data->{$key} = $self->_perform_serialization($val, %options);
             }
             else {
                 $data->{$key} = $val;
@@ -123,13 +123,17 @@ sub _perform_serialization {
 
 
 sub serialize {
-    my ($self, $object) = @_;
-    return unless $object // $self;
-    return $self->_perform_serialization($self->_hashify($object // $self));
+    my ($self, $object, %options) = @_;
+
+    local $MARKER = undef if exists $options{marker} && ! $options{marker};
+
+    return $self->_perform_serialization(
+        $self->_hashify($object // $self), %options
+    );
 }
 
 sub _perform_deserialization {
-    my ($self, $object) = @_;
+    my ($self, $object, %options) = @_;
     return unless $object;
 
     my $data;
@@ -137,14 +141,14 @@ sub _perform_deserialization {
     if ('ARRAY' eq ref $object) {
         $data = [];
         for my $val (@{$object}) {
-            push @{$data} => $self->_perform_deserialization($val);
+            push @{$data} => $self->_perform_deserialization($val, %options);
         }
     }
     elsif ('HASH' eq ref $object) {
         $data = {};
         while (my($key, $val) = each(%{$object})) {
             if ('HASH' eq ref $val) {
-                $data->{$key} = $self->_perform_deserialization($val);
+                $data->{$key} = $self->_perform_deserialization($val, %options);
             }
             else {
                 $data->{$key} = $val;
@@ -163,25 +167,29 @@ sub _perform_deserialization {
 
 
 sub deserialize {
-    my ($self, $object) = @_;
+    my ($self, $object, %options) = @_;
+
     return unless $object;
-    return $self->_perform_deserialization($self->_hashify($object));
+    return $self->_perform_deserialization(
+        $self->_hashify($object), %options
+    );
 }
 
 
 sub serialization_strategy_for {
-    my ($namespace, $reftype, %attributes) = @_;
+    my ($namespace, $reftype, %options) = @_;
 
     die "Couldn't register reftype serialization strategy ".
         "due to invalid arguments" unless
         $namespace && $reftype && (
-            'CODE' eq ref $attributes{collapse} ||
-            'CODE' eq ref $attributes{expand}
+            'CODE' eq ref $options{collapse} ||
+            'CODE' eq ref $options{expand}
         )
     ;
 
-    return $TYPES{ref($namespace) // $namespace}{$reftype} = {%attributes};
+    return $TYPES{ref($namespace) // $namespace}{$reftype} = {%options};
 }
+
 
 1;
 
@@ -195,7 +203,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000005
+version 0.000006
 
 =head1 SYNOPSIS
 
@@ -233,7 +241,9 @@ anticipate the interface will change much.
 The serialize method expects an object and returns a serialized (hashified)
 version of that object.
 
+    my $hash = $self->serialize;
     my $hash = $self->serialize($object);
+    my $hash = $self->serialize($object, marker => 0); # not tagged w/ marker
 
 =head2 deserialize
 
@@ -286,8 +296,10 @@ register a serialization strategy to be executed only for a specific class:
 
 Circular references are problematic and should be avoided, you can weaken or
 otherwise handle them yourself then re-assemble them later as a means toward
-getting around this. Custom serializers must match the object's reftype exactly
-to be enacted. Extending the serialization process with a custom serialization
+getting around this. Blessed objects are made into hashes and tagged for
+deserialization. Tagging blessed references other than hashrefs has not yet
+been implemented. Custom serializers must match the object's reftype exactly to
+be enacted. Extending the serialization process with a custom serialization
 strategy usually means losing the ability to recreate (deserialize) the
 serialized objects, i.e. custom serializers will usually be designed to either
 expand or collapse but probably not both.

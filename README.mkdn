@@ -4,7 +4,7 @@ Object::Serializer - General Purpose Object Serializer
 
 # VERSION
 
-version 0.000005
+version 0.000006
 
 # SYNOPSIS
 
@@ -42,7 +42,9 @@ anticipate the interface will change much.
 The serialize method expects an object and returns a serialized (hashified)
 version of that object.
 
+    my $hash = $self->serialize;
     my $hash = $self->serialize($object);
+    my $hash = $self->serialize($object, marker => 0); # not tagged w/ marker
 
 ## deserialize
 
@@ -95,8 +97,10 @@ register a serialization strategy to be executed only for a specific class:
 
 Circular references are problematic and should be avoided, you can weaken or
 otherwise handle them yourself then re-assemble them later as a means toward
-getting around this. Custom serializers must match the object's reftype exactly
-to be enacted. Extending the serialization process with a custom serialization
+getting around this. Blessed objects are made into hashes and tagged for
+deserialization. Tagging blessed references other than hashrefs has not yet
+been implemented. Custom serializers must match the object's reftype exactly to
+be enacted. Extending the serialization process with a custom serialization
 strategy usually means losing the ability to recreate (deserialize) the
 serialized objects, i.e. custom serializers will usually be designed to either
 expand or collapse but probably not both.

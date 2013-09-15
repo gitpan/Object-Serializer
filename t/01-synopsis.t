@@ -26,8 +26,7 @@ my $foo = Foo->new(
     union2  => 'A String'
 );
 
-my $foo1 = $foo->serialize;
-my $foo2 = {
+my $foo1 = {
     'object' => {
         '__CLASS__' => 'Foo',
         'number'    => 2
@@ -54,6 +53,34 @@ my $foo2 = {
     'union' => [1, 2, 3]
 };
 
-is_deeply $foo1, $foo2, '$foo1 == $foo2 ok';
+is_deeply $foo->serialize => $foo1, '$foo->serialize == $foo1 ok';
+
+my $foo2 = {
+    'object' => {
+        'number'    => 2
+    },
+    'number'    => 10,
+    'union2'    => 'A String',
+    'string'    => 'foo',
+    'array'     => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'boolean'   => 1,
+    'hash'      => {
+        '6'  => undef,
+        '3'  => undef,
+        '7'  => undef,
+        '9'  => undef,
+        '2'  => undef,
+        '8'  => undef,
+        '1'  => undef,
+        '4'  => undef,
+        '10' => undef,
+        '5'  => undef
+    },
+    'float' => '10.5',
+    'union' => [1, 2, 3]
+};
+
+is_deeply $foo->serialize($foo, marker => 0) => $foo2, '$foo->serialize == $foo2 ok';
+
 
 done_testing;
