@@ -1,10 +1,32 @@
 ==================================================
-Changes from 2012-09-15 00:00:00 +0000 to present.
+Changes from 2012-09-16 00:00:00 +0000 to present.
 ==================================================
 
 ---------------------------------------------
-version 0.000006 at 2013-09-15 20:17:17 +0000
+version 0.000007 at 2013-09-16 01:41:40 +0000
 ---------------------------------------------
+
+  Change: 47034ae007aaec3a94c1c4d154caed62b289fdb9
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 21:40:47 +0000
+
+    updated Changes 
+
+  Change: c3489995d7c6147f70ee04c7ac8b729f6417cb06
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 21:39:53 +0000
+
+    ability to tag during serialization/deserialization process 
+
+---------------------------------------------
+version 0.000006 at 2013-09-15 20:17:22 +0000
+---------------------------------------------
+
+  Change: 4d08ef4b675e9795c0a7d4b2c192a9683e3e7294
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 16:17:22 +0000
+
+    v0.000006 
 
   Change: ca1857466994c59880164a694245fbc1f0647bd6
   Author: Al Newkirk <anewkirk@ana.io>

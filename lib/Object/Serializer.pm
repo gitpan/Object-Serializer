@@ -8,7 +8,7 @@ use Scalar::Util qw(blessed);
 our $MARKER = '__CLASS__';
 our %TYPES;
 
-our $VERSION = '0.000006'; # VERSION
+our $VERSION = '0.000007'; # VERSION
 
 
 sub new {
@@ -126,6 +126,7 @@ sub serialize {
     my ($self, $object, %options) = @_;
 
     local $MARKER = undef if exists $options{marker} && ! $options{marker};
+    local $MARKER = $options{marker} if $options{marker};
 
     return $self->_perform_serialization(
         $self->_hashify($object // $self), %options
@@ -169,6 +170,9 @@ sub _perform_deserialization {
 sub deserialize {
     my ($self, $object, %options) = @_;
 
+    local $MARKER = undef if exists $options{marker} && ! $options{marker};
+    local $MARKER = $options{marker} if $options{marker};
+
     return unless $object;
     return $self->_perform_deserialization(
         $self->_hashify($object), %options
@@ -203,7 +207,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000006
+version 0.000007
 
 =head1 SYNOPSIS
 
@@ -243,7 +247,8 @@ version of that object.
 
     my $hash = $self->serialize;
     my $hash = $self->serialize($object);
-    my $hash = $self->serialize($object, marker => 0); # not tagged w/ marker
+    my $hash = $self->serialize($object, marker => 0); # without any marker
+    my $hash = $self->serialize($object, marker => '@'); # with @ as the marker
 
 =head2 deserialize
 
@@ -251,6 +256,7 @@ The deserialize method expects an object and returns a deserialized
 (objectified) version of that object.
 
     my $object = $self->deserialize($object);
+    my $hash = $self->serialize($object, marker => '@'); # with @ as the marker
 
 =head2 serialization_strategy_for
 
