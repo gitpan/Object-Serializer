@@ -3,8 +3,24 @@ Changes from 2012-11-11 00:00:00 +0000 to present.
 ==================================================
 
 ---------------------------------------------
-version 0.000010 at 2013-11-11 08:41:14 +0000
+version 0.000011 at 2013-11-11 20:20:48 +0000
 ---------------------------------------------
+
+  Change: 5d8acb8df63f57caf8bf9cbc3d150023cecb06e9
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-11-11 15:20:39 +0000
+
+    fix bug registering serialization-strategies and cleaning-up closures 
+
+---------------------------------------------
+version 0.000010 at 2013-11-11 08:41:17 +0000
+---------------------------------------------
+
+  Change: fbbc17985cb4c959875b2598e450ad9de24bb747
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-11-11 03:41:17 +0000
+
+    v0.000010 
 
   Change: e8b9ddd2cd84417f8906cc0138f331a0d1d134a6
   Author: Al Newkirk <anewkirk@ana.io>

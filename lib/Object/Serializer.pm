@@ -9,7 +9,7 @@ use Data::Dumper ();
 use Scalar::Util qw(blessed refaddr);
 our %TYPES;
 
-our $VERSION = '0.000010'; # VERSION
+our $VERSION = '0.000011'; # VERSION
 
 
 sub new {
@@ -18,12 +18,12 @@ sub new {
 
 sub _serialization {
     my ($self, $options, $reference, $class) = @_;
+    my @registries = (ref($self) || $self, __PACKAGE__);
 
-    my $coercion;
-    for my $registry (ref $self, __PACKAGE__) {
+    for my $registry (@registries) {
         my $type = $TYPES{$registry};
         next unless 'HASH' eq ref $type;
-        $coercion = $type->{$class};
+        my $coercion = $type->{$class};
         return $coercion->(bless $reference, $class)
             if 'CODE' eq ref $coercion;
     }
@@ -61,8 +61,10 @@ sub serialize {
 
     (my $target = Data::Dumper::Dumper($object // $self)) =~
         s/bless(?=(?:(?:(?:[^"\\]++|\\.)*+"){2})*+(?:[^"\\]++|\\.)*+$)/$execution/g;
+
     my $hash = do { no strict; eval "my \$VAR1 = $target\n" } or die $@;
 
+    undef *{$execution};
     return $hash;
 }
 
@@ -70,12 +72,11 @@ sub serialize {
 sub serialization_strategy_for {
     my ($self, $reftype, $routine) = @_;
 
-    die "Couldn't register reftype serialization strategy ".
-        "due to invalid arguments" unless
-        $self && $reftype && 'CODE' eq ref $routine
-    ;
+    die "Couldn't register reftype serialization " .
+        "strategy due to invalid arguments"
+            unless $self && $reftype && 'CODE' eq ref $routine;
 
-    return $TYPES{ref($self) // $self}{$reftype} = $routine;
+    return $TYPES{ref($self) || $self}{$reftype} = $routine;
 }
 
 
@@ -91,7 +92,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000010
+version 0.000011
 
 =head1 SYNOPSIS
 
