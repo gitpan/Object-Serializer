@@ -2,7 +2,7 @@ NAME
     Object::Serializer - General Purpose Object Serializer
 
 VERSION
-    version 0.000009
+    version 0.000010
 
 SYNOPSIS
         package Point;

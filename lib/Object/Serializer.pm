@@ -3,11 +3,13 @@ package Object::Serializer;
 
 use utf8;
 use 5.010;
+use strict;
+use warnings;
 use Data::Dumper ();
 use Scalar::Util qw(blessed refaddr);
 our %TYPES;
 
-our $VERSION = '0.000009'; # VERSION
+our $VERSION = '0.000010'; # VERSION
 
 
 sub new {
@@ -47,7 +49,10 @@ sub serialize {
     local $Data::Dumper::Purity     = 0;
 
     my $options   = {marker => '__CLASS__', %options};
-    my $execution = "Object::Serializer::Execution_" . refaddr $self;
+    my $execution = join '::', __PACKAGE__, 'Runtime', refaddr $self;
+
+    no strict 'refs';
+    no warnings 'redefine';
 
     *{$execution} = sub {
         my @arguments = @_;
@@ -86,7 +91,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000009
+version 0.000010
 
 =head1 SYNOPSIS
 
