@@ -2,22 +2,40 @@
 package Object::Serializer;
 
 use utf8;
+use 5.010;
 use Data::Dumper ();
-use Scalar::Util qw(blessed);
-
-our $MARKER = '__CLASS__';
+use Scalar::Util qw(blessed refaddr);
 our %TYPES;
 
-our $VERSION = '0.000008'; # VERSION
+our $VERSION = '0.000009'; # VERSION
 
 
 sub new {
     bless {}, shift
 }
 
-sub _hashify {
-    my ($self, $object) = @_;
-    return unless $object;
+sub _serialization {
+    my ($self, $options, $reference, $class) = @_;
+
+    my $coercion;
+    for my $registry (ref $self, __PACKAGE__) {
+        my $type = $TYPES{$registry};
+        next unless 'HASH' eq ref $type;
+        $coercion = $type->{$class};
+        return $coercion->(bless $reference, $class)
+            if 'CODE' eq ref $coercion;
+    }
+
+    # tag blessed hash references
+    $reference->{$options->{marker}} = $class
+        if defined $options->{marker} && 'HASH' eq ref $reference;
+
+    return $reference;
+}
+
+
+sub serialize {
+    my ($self, $object, %options) = @_;
 
     local $Data::Dumper::Terse      = 1;
     local $Data::Dumper::Indent     = 0;
@@ -28,113 +46,31 @@ sub _hashify {
     local $Data::Dumper::Deepcopy   = 1;
     local $Data::Dumper::Purity     = 0;
 
-    my $id = join '::', __PACKAGE__, '_identify';
-    (my $subject = Data::Dumper::Dumper($object)) =~
-        s/bless(?=(?:(?:(?:[^"\\]++|\\.)*+"){2})*+(?:[^"\\]++|\\.)*+$)/$id/g;
+    my $options   = {marker => '__CLASS__', %options};
+    my $execution = "Object::Serializer::Execution_" . refaddr $self;
 
-    return do { no strict; eval "my \$VAR1 = $subject\n" } or die $@;
-}
+    *{$execution} = sub {
+        my @arguments = @_;
+        Object::Serializer::_serialization($self, $options, @arguments);
+    };
 
-sub _identify {
-    my ($reference, $class) = @_;
+    (my $target = Data::Dumper::Dumper($object // $self)) =~
+        s/bless(?=(?:(?:(?:[^"\\]++|\\.)*+"){2})*+(?:[^"\\]++|\\.)*+$)/$execution/g;
+    my $hash = do { no strict; eval "my \$VAR1 = $target\n" } or die $@;
 
-    # support for blessed hash-refs only atm
-    if ('HASH' eq ref $reference) {
-        $reference->{$MARKER} = $class if defined $MARKER;
-    }
-
-    return $reference;
-}
-
-sub _perform_collapse {
-    my ($self, $data) = @_;
-    return unless defined $data;
-
-    my $object = $data;
-
-    if ('HASH' eq ref $object) {
-        if (exists $object->{$MARKER}) {
-            my $class = $object->{$MARKER};
-            my $props = {map {$_ => $object->{$_}}
-                grep {$_ ne $MARKER} keys %{$object}};
-
-            $object = bless $props, $class;
-        }
-    }
-
-    my $reftype = ref $object;
-    return $data unless defined $reftype and blessed $object;
-
-    # explicit type conversion
-    my $direction;
-    for my $class (ref $self, __PACKAGE__) {
-        my $type = $TYPES{$class};
-        next unless 'HASH' eq ref $type;
-
-        $direction = $type->{$reftype};
-    }
-
-    return $data unless 'CODE' eq ref $direction;
-    return $direction->($object);
-}
-
-sub _perform_serialization {
-    my ($self, $object, %options) = @_;
-    return unless $object;
-
-    my $data;
-
-    if ('ARRAY' eq ref $object) {
-        $data = [];
-        for my $val (@{$object}) {
-            push @{$data} =>
-                $self->_perform_serialization($val, %options);
-        }
-    }
-    elsif ('HASH' eq ref $object) {
-        $data = {};
-        while (my($key, $val) = each(%{$object})) {
-            if ('HASH' eq ref $val) {
-                $data->{$key} =
-                    $self->_perform_serialization($val, %options);
-            }
-            else {
-                $data->{$key} = $val;
-            }
-        }
-        if (exists $data->{$MARKER}) {
-            $data = $self->_perform_collapse($data);
-        }
-    }
-    else {
-        $data = $self->_perform_collapse($object);
-    }
-
-    return $data;
-}
-
-
-sub serialize {
-    my ($self, $object, %options) = @_;
-
-    local $MARKER = undef if exists $options{marker} && ! defined $options{marker};
-    local $MARKER = $options{marker} if $options{marker};
-
-    return $self->_perform_serialization(
-        $self->_hashify($object // $self), %options
-    );
+    return $hash;
 }
 
 
 sub serialization_strategy_for {
-    my ($namespace, $reftype, $routine) = @_;
+    my ($self, $reftype, $routine) = @_;
 
     die "Couldn't register reftype serialization strategy ".
         "due to invalid arguments" unless
-        $namespace && $reftype && 'CODE' eq ref $routine
+        $self && $reftype && 'CODE' eq ref $routine
     ;
 
-    return $TYPES{ref($namespace) // $namespace}{$reftype} = $routine;
+    return $TYPES{ref($self) // $self}{$reftype} = $routine;
 }
 
 
@@ -150,7 +86,7 @@ Object::Serializer - General Purpose Object Serializer
 
 =head1 VERSION
 
-version 0.000008
+version 0.000009
 
 =head1 SYNOPSIS
 
@@ -230,11 +166,7 @@ register a serialization strategy to be executed only for a specific class:
 
 Circular references are problematic and should be avoided, you can weaken or
 otherwise handle them yourself then re-assemble them later as a means toward
-getting around this. Blessed objects are made into hashes and tagged for
-deserialization. Tagging blessed references other than hashrefs has not yet been
-implemented i.e. blessed references which aren't hash references will be
-serialized but not tagged. Custom serializers must match the object's reftype
-exactly to be enacted.
+getting around this.
 
 =head1 AUTHOR
 

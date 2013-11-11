@@ -3,8 +3,24 @@ Changes from 2012-11-11 00:00:00 +0000 to present.
 ==================================================
 
 ---------------------------------------------
-version 0.000008 at 2013-11-11 05:31:52 +0000
+version 0.000009 at 2013-11-11 08:24:53 +0000
 ---------------------------------------------
+
+  Change: 92a901e7c8df14a09f3ba9cb3c975a5a2cb9ca67
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-11-11 03:24:39 +0000
+
+    refactored, less code, better execution 
+
+---------------------------------------------
+version 0.000008 at 2013-11-11 05:31:56 +0000
+---------------------------------------------
+
+  Change: 11036cd8b28f0232b38e6da332de261d614e264c
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-11-11 00:31:56 +0000
+
+    v0.000008 
 
   Change: 248b03d7a421ca982a3b695a12bb1dfcaf43454b
   Author: Al Newkirk <anewkirk@ana.io>

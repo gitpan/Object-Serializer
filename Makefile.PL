@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-
+use 5.010;
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -20,12 +20,13 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "Object::Serializer",
   "PREREQ_PM" => {
-    "Data::Dumper" => 0
+    "Data::Dumper" => 0,
+    "Scalar::Util" => 0
   },
   "TEST_REQUIRES" => {
     "Test::More" => 0
   },
-  "VERSION" => "0.000008",
+  "VERSION" => "0.000009",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -2,7 +2,7 @@ NAME
     Object::Serializer - General Purpose Object Serializer
 
 VERSION
-    version 0.000008
+    version 0.000009
 
 SYNOPSIS
         package Point;
@@ -77,11 +77,7 @@ EXTENSION
 CAVEATS
     Circular references are problematic and should be avoided, you can
     weaken or otherwise handle them yourself then re-assemble them later as
-    a means toward getting around this. Blessed objects are made into hashes
-    and tagged for deserialization. Tagging blessed references other than
-    hashrefs has not yet been implemented i.e. blessed references which
-    aren't hash references will be serialized but not tagged. Custom
-    serializers must match the object's reftype exactly to be enacted.
+    a means toward getting around this.
 
 AUTHOR
     Al Newkirk <anewkirk@ana.io>
