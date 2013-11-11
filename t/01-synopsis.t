@@ -80,7 +80,8 @@ my $foo2 = {
     'union' => [1, 2, 3]
 };
 
-is_deeply $foo->serialize($foo, marker => 0) => $foo2, '$foo->serialize == $foo2 ok';
+is_deeply $foo->serialize($foo, marker => undef) => $foo2,
+    '$foo->serialize == $foo2 ok';
 
 
 done_testing;

@@ -1,10 +1,26 @@
 ==================================================
-Changes from 2012-09-16 00:00:00 +0000 to present.
+Changes from 2012-11-11 00:00:00 +0000 to present.
 ==================================================
 
 ---------------------------------------------
-version 0.000007 at 2013-09-16 01:41:40 +0000
+version 0.000008 at 2013-11-11 05:31:52 +0000
 ---------------------------------------------
+
+  Change: 248b03d7a421ca982a3b695a12bb1dfcaf43454b
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-11-11 00:31:17 +0000
+
+    removed deserialization functionality 
+
+---------------------------------------------
+version 0.000007 at 2013-09-16 01:41:47 +0000
+---------------------------------------------
+
+  Change: d55f16a94091706b93de767ebc061837cc3f54f2
+  Author: Al Newkirk <anewkirk@ana.io>
+  Date : 2013-09-15 21:41:47 +0000
+
+    v0.000007 
 
   Change: 47034ae007aaec3a94c1c4d154caed62b289fdb9
   Author: Al Newkirk <anewkirk@ana.io>
